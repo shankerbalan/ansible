@@ -47,14 +47,18 @@ def get_master_uuid(session):
     return master_uuid
 
 def get_patch_list(session):
-  patches = session.xenapi.host_patch.get_all()
-  hotfixes = {}
+  patches = session.xenapi.pool_patch.get_all()
+  facts = {}
   for p in patches:
-    pool_patch    = session.xenapi.host_patch.get_pool_patch(p)
-    patch_name    = session.xenapi.pool_patch.get_name_label(pool_patch)
-    patch_status  = session.xenapi.host_patch.get_applied(p)
-    hotfixes[patch_name] = patch_status
-  return hotfixes
+    patch_name    = session.xenapi.pool_patch.get_name_label(p)
+    hosts = session.xenapi.pool_patch.get_host_patches(p)
+    for h in hosts:
+      opaque_ref  = session.xenapi.host_patch.get_host(h)
+      host_name = session.xenapi.host.get_name_label(opaque_ref)
+      if host_name == hostname:
+        applied = session.xenapi.host_patch.get_applied(h)
+        facts[patch_name] = { "applied" : applied }
+  return facts
 
 def get_dom0_mem():
   cmd = '/opt/xensource/libexec/xen-cmdline'
