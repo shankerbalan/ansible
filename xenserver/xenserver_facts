@@ -73,8 +73,22 @@ def get_network_list(session):
     bridge  = session.xenapi.network.get_bridge(n)
     facts["name_label"] = session.xenapi.network.get_name_label(n)
     facts["uuid"]  = session.xenapi.network.get_uuid(n)
+    facts["description"] = session.xenapi.network.get_name_description(n)
     network_list[bridge] = facts
   return network_list
+
+def get_pif_list(session):
+  interfaces = session.xenapi.PIF.get_all()
+  pif_list = {}
+  for f in interfaces:
+    facts   = {}
+    device = session.xenapi.PIF.get_device(f)
+    facts["uuid"]   = session.xenapi.PIF.get_uuid(f)
+    facts["ip"]     = session.xenapi.PIF.get_IP(f)
+    facts["netmask"] = session.xenapi.PIF.get_netmask(f)
+    facts["gateway"] = session.xenapi.PIF.get_gateway(f)
+    pif_list[device] = facts
+  return pif_list
 
 facts = {}
 facts['ansible_xen_hostname']     = hostname
@@ -83,6 +97,7 @@ facts['ansible_xen_master_uuid']  = get_master_uuid(session)
 facts['ansible_xen_hotfixes']     = get_patch_list(session)
 facts['ansible_xen_dom0_mem']     = get_dom0_mem()
 facts['ansible_xen_networks']     = get_network_list(session)
+facts['ansible_xen_pifs']         = get_pif_list(session)
 
 session.xenapi.session.logout()
 
