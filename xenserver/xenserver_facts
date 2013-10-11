@@ -31,47 +31,58 @@ except ImportError:
     import simplejson as json
 
 def get_host_uuid(session, hostname):
-	hosts = session.xenapi.host.get_by_name_label(hostname)
-	for h in hosts:
-		host_uuid = session.xenapi.host.get_uuid(h)
-	return host_uuid
+  hosts = session.xenapi.host.get_by_name_label(hostname)
+  for h in hosts:
+    host_uuid = session.xenapi.host.get_uuid(h)
+  return host_uuid
 
 def get_master_uuid(session):
-	pools = session.xenapi.pool.get_all()
-	for p in pools:
-		opaque_ref = session.xenapi.pool.get_master(p)
-	master_uuid = session.xenapi.host.get_uuid(opaque_ref)
-	if master_uuid == "":
-		print "failed to get master"
-	else:
-		return master_uuid
+  pools = session.xenapi.pool.get_all()
+  for p in pools:
+    opaque_ref = session.xenapi.pool.get_master(p)
+  master_uuid = session.xenapi.host.get_uuid(opaque_ref)
+  if master_uuid == "":
+    print "failed to get master"
+  else:
+    return master_uuid
 
 def get_patch_list(session):
-	patches = session.xenapi.host_patch.get_all()
-	hotfixes = {}
-	for p in patches:
-		pool_patch		= session.xenapi.host_patch.get_pool_patch(p)
-		patch_name		= session.xenapi.pool_patch.get_name_label(pool_patch)
-		patch_status 	= session.xenapi.host_patch.get_applied(p)
-		hotfixes[patch_name] = patch_status
-	return hotfixes
+  patches = session.xenapi.host_patch.get_all()
+  hotfixes = {}
+  for p in patches:
+    pool_patch    = session.xenapi.host_patch.get_pool_patch(p)
+    patch_name    = session.xenapi.pool_patch.get_name_label(pool_patch)
+    patch_status  = session.xenapi.host_patch.get_applied(p)
+    hotfixes[patch_name] = patch_status
+  return hotfixes
 
 def get_dom0_mem():
-	cmd = '/opt/xensource/libexec/xen-cmdline'
-	p = subprocess.Popen([cmd, "--get-xen", "dom0_mem"], stdout=subprocess.PIPE)
-	out, err = p.communicate()
-	
-	string = re.split(',', out)
-	mem = re.split('=', string[0])
-	return mem[1]
-	
+  cmd = '/opt/xensource/libexec/xen-cmdline'
+  p = subprocess.Popen([cmd, "--get-xen", "dom0_mem"], stdout=subprocess.PIPE)
+  out, err = p.communicate()
+  
+  string = re.split(',', out)
+  mem = re.split('=', string[0])
+  return mem[1]
+
+def get_network_list(session):
+  networks = session.xenapi.network.get_all()
+  network_list = {}
+  for n in networks:
+    facts = {}
+    bridge  = session.xenapi.network.get_bridge(n)
+    facts["name_label"] = session.xenapi.network.get_name_label(n)
+    facts["uuid"]  = session.xenapi.network.get_uuid(n)
+    network_list[bridge] = facts
+  return network_list
 
 facts = {}
-facts['ansible_xen_hostname'] 		= hostname
-facts['ansible_xen_host_uuid'] 		= get_host_uuid(session,hostname)
-facts['ansible_xen_master_uuid'] 	= get_master_uuid(session)
-facts['ansible_xen_hotfixes'] 		= get_patch_list(session)
-facts['ansible_xen_dom0_mem']		= get_dom0_mem()
+facts['ansible_xen_hostname']     = hostname
+facts['ansible_xen_host_uuid']    = get_host_uuid(session,hostname)
+facts['ansible_xen_master_uuid']  = get_master_uuid(session)
+facts['ansible_xen_hotfixes']     = get_patch_list(session)
+facts['ansible_xen_dom0_mem']     = get_dom0_mem()
+facts['ansible_xen_networks']     = get_network_list(session)
 
 session.xenapi.session.logout()
 
