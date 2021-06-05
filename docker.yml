@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: yes
+  connection: local
+  roles:
+  - { role: docker, tags: [ docker ] }
+
+# vi: ts=2 sw=2 expantab

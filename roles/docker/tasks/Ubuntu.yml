@@ -1,0 +1,32 @@
+---
+
+- name: Add Apt keys
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    validate_certs: yes
+
+- name: Add Apt Repos
+  apt_repository:
+    repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable'
+    update_cache: yes
+    mode: 0644
+    state: present
+
+- name: Install Docker
+  apt:
+    name:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose
+    state: present
+
+- name: Add user Ubuntu to docker group
+  user:
+    name: "{{item}}"
+    groups: docker
+    append: yes
+    state: present
+  with_items:
+  - ubuntu
