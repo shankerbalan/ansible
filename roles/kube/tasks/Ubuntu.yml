@@ -1,0 +1,17 @@
+- name: Add Apt keys
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    validate_certs: no
+
+- name: Add Apt Repos
+  apt_repository:
+    repo: 'deb https://apt.kubernetes.io/ kubernetes-xenial main'
+    update_cache: yes
+    mode: 0644
+    state: present
+
+- name: Install Kube apps
+  apt:
+    name:
+    - kubectl
+    state: present
