@@ -1,0 +1,19 @@
+---
+
+- name: Add Apt keys
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    validate_certs: no
+
+- name: Add Apt Repos
+  apt_repository:
+    repo: 'deb https://apt.releases.hashicorp.com {{ansible_distribution_release}} main'
+    update_cache: yes
+    mode: 0644
+    state: present
+
+- name: Install Docker
+  apt:
+    name:
+    - terraform
+    state: present

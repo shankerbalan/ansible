@@ -1,0 +1,9 @@
+---
+
+- hosts: all:localhost
+  become: yes
+  connection: local
+  roles:
+  - { role: terraform, tags: [ terraform ] }
+
+# vi: ts=2 sw=2 expantab

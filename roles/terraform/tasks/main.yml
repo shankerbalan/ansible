@@ -1,0 +1,4 @@
+---
+# tasks file for terraform
+
+- include: "{{ansible_distribution}}.yml"
