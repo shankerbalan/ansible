@@ -1,0 +1,19 @@
+---
+
+- name: Add Apt keys
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    validate_certs: no
+
+- name: Add Apt Repos
+  apt_repository:
+    repo: 'deb https://baltocdn.com/helm/stable/debian/ all main'
+    update_cache: yes
+    mode: 0644
+    state: present
+
+- name: Install Helm
+  apt:
+    name:
+    - helm
+    state: present
