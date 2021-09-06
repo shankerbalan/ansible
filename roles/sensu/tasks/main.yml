@@ -1,0 +1,13 @@
+---
+# tasks file for sensu
+- name: Add Apt keys
+  apt_key:
+    url: https://packagecloud.io/sensu/stable/gpgkey
+    validate_certs: false
+
+- name: Add packagecloud.io sensu-go Apt repo
+  apt_repository:
+    repo: 'deb https://packagecloud.io/sensu/stable/ubuntu/ {{ansible_distribution_release}} main'
+    update_cache: yes
+    state: present
+    mode: 0644
